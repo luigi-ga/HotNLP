@@ -1,0 +1,66 @@
+Question,Attribute name,Answer for item 1 - Circle,Answer for item 2 - Square,Answer for item 4 - Triangle,Answer for item 11 - Oval,Answer for item 14 – Trapezoid,Answer for item 21 - Crescent,Answer for item 25 - Quadrilateral,Answer for item 32 - Cube,Answer for item 34 – Cone,Answer for item 35 - Pyramid,Answer for item 39 – Hexagonal Prism,Answer for item 47 – Icosahedron
+What is the typical number of sides of X?,number_of_sides,0 (no sides),4,3,0 (no sides),4,0 (no straight sides),4,12,1 curved + 1 flat,At least 4,18,30
+What is the typical number of vertices of X?,number_of_vertices,0 (no vertices),4,3,0 (no vertices),4,0 (no vertices),4,8,1 (apex),At least 4,12,12
+What is the typical symmetry of X?,symmetry,Infinite symmetry,4-fold symmetry,Depends,2-fold symmetry,1-fold symmetry,No symmetry,Depends on the type of quadrilateral,4-fold symmetry,Infinite symmetry along the axis,Depends on the base shape,6-fold symmetry,5-fold symmetry
+What is the typical area formula of X?,area_formula,πr²,side²,1/2 × base × height,π × major axis/2 × minor axis/2,1/2 × (sum of parallel sides) × height,Complex formula,Varies,6 × side²,π × radius × slant height,Varies,6 × side × height + 3 × sqrt(3) × side²,5 × sqrt(3) × side²
+What is the typical volume formula of X?,volume_formula,Not applicable,Not applicable,Not applicable,Not applicable,Not applicable,Not applicable,Not applicable,side³,1/3 × π × radius² × height,1/3 × base area × height,3 × sqrt(3) × side² × height / 2,(5 × (3 + sqrt(5)) × side³) / 12
+Is X commonly found in nature?,found_in_nature,Yes,Rarely,Rarely,Yes,Rarely,Yes,Rarely,Rarely,Yes,Yes,Rarely,Rarely
+Is X commonly used in geometry?,used_in_geometry,Yes,Yes,Yes,Yes,Yes,No,Yes,Yes,Yes,Yes,Yes,Yes
+Can X be tessellated?,tessellation_capability,No,Yes,Yes,No,Yes,No,Yes,No,No,No,No,No
+Is X typically used in logo design?,used_in_logo_design,Yes,Yes,Yes,Yes,Yes,Yes,Yes,Yes,Yes,Yes,Yes,No
+What is the typical perimeter formula of X?,perimeter_formula,2πr,4a,a + b + c,No simple formula,a + b + c + d,No simple formula,a + b + c + d,N/D,N/D,N/D,N/D,N/D
+Is X regularly used in mathematical proofs?,used_in_proofs,Yes,Yes,Yes,No,Yes,No,Yes,Yes,Yes,Yes,Yes,Yes
+Can X be inscribed in a circle?,inscribable_in_circle,Yes,Yes,Yes,Yes,No,No,Varies,No,No,No,No,No
+Can a circle be inscribed in X?,circle_inscribable,Yes,Yes,Depends on the type,No,Depends on the type,No,Depends on the type,No,No,No,No,No
+Is X commonly used in architectural designs?,used_in_architecture,Yes,Yes,Yes,Less common,Yes,Rare,Yes,Yes,Less common,Yes,Less common,Rare
+What is the typical surface area formula of X?,surface_area_formula,πr²,s²,½bh,No standard formula,½(a+b)h,No standard formula,Varies,6s²,πr(r + l),Varies,2(3√3/2)s² + 6sh,5√3s²
+Is X typically used in children's education?,used_in_education,Yes,Yes,Yes,Yes,Yes,Less common,Yes,Yes,Yes,Yes,Less common,Less common
+Can X be found in art and symbolism?,found_in_art,Yes,Yes,Yes,Yes,Yes,Yes,Yes,Yes,Yes,Yes,Yes,Yes
+Is X used in graphical representations?,used_in_graphics,Yes,Yes,Yes,Yes,Yes,Yes,Yes,Yes,Yes,Yes,Yes,Less common
+Does X have any notable cultural or historical significance?,cultural_significance,"Yes, symbol of infinity, perfection, and unity","Yes, symbol of stability, equality, and honesty","Yes, symbolizes stability and strength; religious and cultural significance","Yes, symbol of rebirth and renewal (e.g., eggs)","Less significant, but used in architecture and design","Yes, religious and cultural symbol (e.g., Islam)","Less culturally significant, fundamental geometric shape","Yes, symbolizes stability and the physical world","Less significant, but notable in mathematics and engineering","Yes, historical and cultural significance (e.g., Egypt)","Less significant, but notable in crystallography and architecture","Less culturally significant, but notable in mathematics"
+What is the typical base shape of X?,base_shape,N/A - is itself a shape,N/A - is itself a shape,N/A - is itself a shape,N/A - is itself a shape,N/A - is itself a shape,N/A - is itself a shape,N/A - is itself a shape,Square,Circle,Triangle or Square,Hexagon,Triangle
+Can X roll or slide?,roll_or_slide,Roll,Slide,Slide,Roll,Slide,Slide,Slide,Slide,Roll and slide,Slide,Slide,Slide
+Is X a primary shape taught in basic geometry?,taught_in_basic_geometry,Yes,Yes,Yes,Yes,Yes,Less commonly,Yes,"Yes, in 3D geometry","Yes, in 3D geometry","Yes, in 3D geometry",Less commonly,Less commonly
+What is the common use of X in mathematics?,common_use_in_math,"Used in geometry, trigonometry, and calculations involving pi","Used to represent area, quadrilaterals, and as a fundamental shape","Used in trigonometry, geometry, and to represent strength and balance",Used in geometry and art; often for representing ellipses,Used in geometry to study quadrilaterals and area calculation,Used in art and symbolism more than in mathematics,Used to study a wide range of four-sided figures in geometry,"Used in 3D geometry, volume calculations, and in many fields","Used in 3D geometry, volume calculations, and surface area calculations",Used in 3D geometry and volume calculations,Used in 3D geometry and in studying prisms,"Used in geometry, particularly in the study of Platonic solids"
+Is X typically solid or hollow?,solid_or_hollow,Hollow,Hollow,Hollow,Hollow,Hollow,Hollow,Hollow,Solid,Hollow,Solid,Solid,Solid
+Can X be divided into congruent shapes?,divisible_into_congruents,Yes,Yes,Yes,No,Depends,No,Depends,Yes,No,No,Yes,No
+Is X typically used in puzzles?,used_in_puzzles,Yes,Yes,Yes,No,No,No,Yes,Yes,No,No,Yes,No
+Does X have equal sides and angles?,equal_sides_and_angles,No,Yes,Depends (equilateral: yes),No,No,No,Depends,Yes,No,No,Depends,Yes
+Is X used in measurements?,used_in_measurements,Yes,Yes,No,No,No,No,No,Yes,No,No,Yes,No
+Does X have a constant width?,constant_width,Yes,Yes,No,No,No,No,No,Yes,No,No,Yes,No
+What is the number of dimensions of X?,dimensions,2,2,2,2,2,2,2,3,3,3,3,3
+Do X sides all have the same length?,all equal sizes,Not applicable,Yes,No (can vary),No,No,No,No (can vary),Yes,No,No,No,Yes
+What is the number of sides of X which can be equal?,equal_sizes_number,Not applicable,4,3,Not applicable,2 or 0,Not applicable,4 (can vary),12,1 (base),Depends on base,12,30
+Are X diagonals equal?,equal_diagonals,Not applicable,Yes,No (can vary),No,No,No,No (can vary),Yes,Not applicable,No,No,No
+Is X typically studied at school?,school,Yes,Yes,Yes,Yes,Yes,Yes,Yes,Yes,Yes,Yes,Yes,Yes
+Does X have a radius?,radius,Yes,No,No,No,No,No,No,No,Yes (at base),No,No,No
+Is X typically symbolic of another concept?,symbolic,"Yes (unity, completeness)","Yes (fairness, stability)","Yes (strength, change)","Yes (rebirth, renewal)",No,"Yes (change, transition)",No,"Yes (stability, balance)",No,"Yes (mystery, longevity)",No,"Yes (water, change)"
+What concept is X typically a symbol of?,symbol_of,"Infinity, unity, perfection","Equality, stability","Change, strength","Renewal, rebirth","Unconventionality, uniqueness","Change, growth","Variability, adaptability","Stability, practicality","Direction, energy","Mystery, durability","Balance, harmony","Complexity, unpredictability"
+"Are X sides all straight, curved or mixed?",mixed_sides,Curved,Straight,Straight,Curved,Straight,Curved,Straight,Straight,Mixed,Straight,Straight,Straight
+Is X alive?,having_life,No,No,No,No,No,No,No,No,No,No,No,No
+Is X a two-dimensional or three-dimensional shape?,dimensionality,Two-dimensional,Two-dimensional,Two-dimensional,Two-dimensional,Two-dimensional,Two-dimensional,Two-dimensional,Three-dimensional,Three-dimensional,Three-dimensional,Three-dimensional,Three-dimensional
+Does X have straight sides or curved sides?,edges,Curved,Straight,Straight,Curved,Straight,Curved,Straight,Straight,Mixed,Straight,Straight,Straight
+Is X a polygon?,polygon,No,Yes,Yes,No,Yes,No,Yes,No,No,No,No,No
+Is X a closed or open shape?,closure,Closed,Closed,Closed,Closed,Closed,Open,Closed,Closed,Closed,Closed,Closed,Closed
+Is X a closed geometric figure with three sides?,triangle,No,No,Yes,No,No,No,No,No,No,Depends on base,No,No
+Is X a convex or concave shape?,convexity,Convex,Convex,Convex or Concave,Convex,Convex,Concave,Convex or Concave,Convex,Convex,Convex,Convex,Convex
+Is X a circle or an ellipse?,elliptical,Yes,Neither,Neither,Ellipse,Neither,Neither,Neither,Neither,Neither,Neither,Neither,Neither
+Is X a regular or irregular shape?,regularity,Regular,Regular,Regular or Irregular,Irregular,Irregular,Irregular,Regular or Irregular,Regular,Irregular,Irregular,Regular,Regular
+Does X have an odd number of sides?,odd_sides,No,No,No,No,No,No,No,No,No,Depends on base,No,No
+Does X have parallel sides?,parallelism,No,Yes,No,No,Yes,No,Yes,Yes,No,Yes,Yes,No
+Does X have perpendicular sides?,perpendicularity,No,Yes,No,No,Yes,No,Yes,Yes,No,No,Yes,No
+Is X a composite shape?,composition,No,No,No,No,No,No,No,Yes,Yes,Yes,Yes,No
+Does X have rotational symmetry?,symmetry,Yes,Yes,No,Yes,No,No,Depends,Yes,Yes,Depends,Yes,Yes
+Does X have equal interior angles?,equiangular,No,Yes,No,No,No,No,Depends,Yes,No,No,Yes,Yes
+Does X have any right angles?,right_angled,No,Yes,No,No,Yes,No,Depends,Yes,No,No,Yes,No
+Does X have any acute angles?,acuteness,No,No,Yes,No,Yes,Yes,Yes,No,No,Yes,No,No
+Does X have any obtuse angles?,obtuseness,No,No,Yes,No,Yes,No,Yes,No,No,No,No,No
+Is X a regular or irregular polygon?,polygonality,Not a polygon,Regular,Can be both,Not a polygon,Irregular,Not a polygon,Can be both,Not a polygon,Not a polygon,Not a polygon,Not a polygon,Regular
+Does X have an unequal pair of parallel lines?,unequa_parallelism,No,No,No,No,Yes,No,Can be,No,No,No,No,No
+Does X have any acute angles and equal sides?,acute_equilateral,No,No,Can be,No,No,No,Can be,No,No,No,No,No
+Does X have any acute angles and unequal sides?,over_180_symmetry,No,No,Can be,No,Yes,Yes,Can be,No,No,Yes,No,No
+How many vertices does X have?,obtuse_equilateral,0,4,3,0,4,0,4,8,1,5,12,12
+Does X have any obtuse angles and equal sides?,obtuse_inequilateral,No,No,Depends on type,No,No,No,Depends on type,No,No,No,No,No
+Does X have any obtuse angles and unequal sides?,perpendicular_equiangular,No,No,Depends on type,No,Yes,No,Depends on type,No,No,No,No,No
+Is X a closed curve with no straight sides?,closed_curve,Yes,No,No,Yes,No,Yes,No,No,No,No,No,No
+Does X have an unequal pair of parallel lines and equal angles?,unequal_parallel_equiangular,No,No,No,No,Yes,No,No,No,No,No,No,No

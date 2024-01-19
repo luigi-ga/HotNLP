@@ -1,0 +1,31 @@
+Question,Attribute name,Answer for Circle,Answer for Square,Answer for Triangle,Answer for Cube,Answer for Pyramid
+What is the typical number of sides of X?,number_of_sides,1 (circumference),4,3,12,depends on base
+What is the typical number of vertices of X?,number_of_vertices,0,4,3,8,depends on base + 1
+Is X a two-dimensional or three-dimensional shape?,dimensionality,two-dimensional,two-dimensional,two-dimensional,three-dimensional,three-dimensional
+What is the typical symmetry of X?,symmetry,infinite rotational,4-fold rotational,depends on type,4-fold rotational,depends on base
+What is the typical area formula of X?,area_formula,πr²,side²,½ × base × height,N/A,N/A
+What is the typical volume formula of X?,volume_formula,N/A,N/A,N/A,side³,(1/3) × base area × height
+Is X commonly found in nature?,found_in_nature,yes,no,yes,no,no
+Is X commonly used in geometry?,used_in_geometry,yes,yes,yes,yes,yes
+Can X be tessellated?,tessellation_capability,no,yes,yes,no,no
+Is X typically used in logo design?,used_in_logo_design,yes,yes,yes,yes,yes
+What is the typical perimeter formula of X?,perimeter_formula,2πr,4 × side,sum of all sides,N/A,N/A
+Is X regularly used in mathematical proofs?,used_in_proofs,yes,yes,yes,yes,yes
+Can X be inscribed in a circle?,inscribable_in_circle,yes,yes,yes,no,no
+Can a circle be inscribed in X?,circle_inscribable,yes,yes,yes,no,no
+Is X commonly used in architectural designs?,used_in_architecture,yes,yes,yes,yes,yes
+What is the typical surface area formula of X?,surface_area_formula,N/A,N/A,N/A,6 × side²,depends on base
+Is X typically used in children's education?,used_in_education,yes,yes,yes,yes,yes
+Can X be found in art and symbolism?,found_in_art,yes,yes,yes,yes,yes
+Is X used in graphical representations?,used_in_graphics,yes,yes,yes,yes,yes
+Does X have any notable cultural or historical significance?,cultural_significance,yes,yes,yes,yes,yes
+What is the typical base shape of X?,base_shape,N/A,N/A,N/A,square,depends on base
+Can X roll or slide?,roll_or_slide,can roll,can slide,can slide,can roll and slide,can slide
+Is X a primary shape taught in basic geometry?,taught_in_basic_geometry,yes,yes,yes,yes,no
+What is the common use of X in mathematics?,common_use_in_math,"defining pi, circles",area and perimeter calculations,"trigonometry, area calculations",volume calculations,volume calculations
+Is X typically solid or hollow?,solid_or_hollow,hollow,hollow,hollow,solid,solid
+Can X be divided into congruent shapes?,divisible_into_congruents,yes,yes,yes,yes,yes
+Is X typically used in puzzles?,used_in_puzzles,yes,yes,yes,yes,yes
+Does X have equal sides and angles?,equal_sides_and_angles,yes,yes,depends on type,yes,depends on base
+Is X used in measurements?,used_in_measurements,yes,yes,yes,yes,no
+Does X have a constant width?,constant_width,yes,no,no,yes,no
