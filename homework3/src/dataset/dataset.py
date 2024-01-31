@@ -3,92 +3,11 @@ import torch
 from PIL import Image
 from tqdm.notebook import tqdm
 from torch.utils.data import Dataset
-from transformers import DistilBertTokenizer
-
-
-
-class VisualWSDDataset(Dataset):
-    def __init__(self, data_dir, data_file, gold_file, transform=None, max_length=5, max_samples=None):
-        """
-        Args:
-            data_dir (string): Directory with all the images.
-            data_file (string): Path to the file with annotations.
-            gold_file (string): Path to the file with gold labels.
-            transform (callable, optional): Optional transform to be applied on a sample.
-        """
-        self.data_dir = data_dir
-        self.data_info = self._read_data_file(data_file)
-        self.gold_labels = self._read_gold_file(gold_file)
-        self.transform = transform
-        self.max_length = max_length
-        self.max_samples = max_samples
-
-        # Initialize tokenizer
-        self.tokenizer = DistilBertTokenizer.from_pretrained('distilbert-base-uncased')
-
-        # Build data
-        self.data = self.build_dataset()
-
-    def build_dataset(self):
-        # Initialize the data list
-        data = []
-
-        # Iterate over the data
-        for idx in tqdm(range(len(self.data_info)), 'Building VisualWSDDataset'):
-            # Break if max_samples is specifies
-            if self.max_samples and idx == self.max_samples: break
-
-            # Tokenize label using BERT
-            tokenized_label = self.tokenizer(
-                self.data_info[idx][1],
-                max_length=self.max_length,
-                padding='max_length',
-                truncation=True,
-                return_tensors="pt")
-            # Read images as PIL, transform, and add them to a list
-            images = [os.path.join(self.data_dir, img_name) for img_name in self.data_info[idx][2:]]
-            # Find the index of the gold label in the images list
-            gold_label_index = torch.tensor(self.data_info[idx][2:].index(self.gold_labels[idx]))
-
-            # Append data
-            data.append([tokenized_label['input_ids'].squeeze(0), tokenized_label['attention_mask'].squeeze(0), images, gold_label_index])
-
-        # Return data
-        return data
-
-    def _read_data_file(self, file_path):
-        data_info = []
-        with open(file_path, 'r') as f:
-            for line in f:
-                parts = line.strip().split('\t')
-                if len(parts) > 1:  # Make sure it's not an empty line
-                    data_info.append(parts)
-        return data_info
-
-    def _read_gold_file(self, file_path):
-        gold_labels = []
-        with open(file_path, 'r') as f:
-            for line in f:
-                gold_labels.append(line.strip())
-        return gold_labels
-
-    def __len__(self):
-        return len(self.data)
-
-    def __getitem__(self, idx):
-        if torch.is_tensor(idx):
-            idx = idx.tolist()
-
-        images = self.data[idx][2]
-
-        if self.transform:
-            images = [self.transform(Image.open(img_path)) for img_path in images]
-
-        return self.data[idx][0], self.data[idx][1], images, self.data[idx][3]
+from transformers import MarianMTModel, MarianTokenizer
     
 
 class VisualWSDDatasetCLIP(Dataset):
-    def __init__(self, data_dir, data_file, gold_file, transform=None, max_length=5, max_samples=None):
+    def __init__(self, data_dir, data_file, gold_file, transform=None, max_samples=None, language='en'):
         """
         Args:
             data_dir (string): Directory with all the images.
@@ -97,11 +16,17 @@ class VisualWSDDatasetCLIP(Dataset):
             transform (callable, optional): Optional transform to be applied on a sample.
         """
         self.data_dir = data_dir
-        self.data_info = self._read_data_file(data_file)
-        self.gold_labels = self._read_gold_file(gold_file)
+        self.data_info = self._read_data_file(data_file[language])
+        self.gold_labels = self._read_gold_file(gold_file[language])
         self.transform = transform
-        self.max_length = max_length
-        self.max_samples = max_samples
+        self.max_samples =  max_samples
+        self.language = language
+
+        # Initialize translation model and tokenizer if needed
+        #if self.language != 'en':
+        #    model_name = f'Helsinki-NLP/opus-mt-{self.language}-en'
+        #    self.tokenizer = MarianTokenizer.from_pretrained(model_name)
+        #    self.translation_model = MarianMTModel.from_pretrained(model_name)
 
         # Build data
         self.data = self.build_dataset()
@@ -124,6 +49,12 @@ class VisualWSDDatasetCLIP(Dataset):
 
         # Return data
         return data
+    
+    def translate(self, text):
+        with torch.no_grad():
+            inputs = self.tokenizer(text, return_tensors="pt", padding=True, truncation=True)
+            translated = self.translation_model.generate(**inputs)
+            return self.tokenizer.decode(translated[0], skip_special_tokens=True)
 
     def _read_data_file(self, file_path):
         data_info = []
@@ -148,12 +79,18 @@ class VisualWSDDatasetCLIP(Dataset):
         if torch.is_tensor(idx):
             idx = idx.tolist()
         
+        label = self.data[idx][0]
         images = self.data[idx][1]
+        gold_label_index = self.data[idx][2]
         
         if self.transform:
             images = [self.transform(Image.open(img_path)) for img_path in images]
 
-        return self.data[idx][0], images, self.data[idx][2]
+        # Translate the phrase if necessary
+        #if self.language != 'en':
+        #    label = self.translate(label)
+
+        return label, images, gold_label_index
     
 
 class TripletsWSDDatasetCLIP(Dataset):
