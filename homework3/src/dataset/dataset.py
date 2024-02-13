@@ -3,8 +3,6 @@ import torch
 from PIL import Image
 from tqdm.notebook import tqdm
 from torch.utils.data import Dataset
-from transformers import MarianMTModel, MarianTokenizer
-    
 
 class VisualWSDDatasetCLIP(Dataset):
     def __init__(self, data_dir, data_file, gold_file, transform=None, max_samples=None, language='en'):
@@ -16,20 +14,16 @@ class VisualWSDDatasetCLIP(Dataset):
             transform (callable, optional): Optional transform to be applied on a sample.
         """
         self.data_dir = data_dir
-        self.data_info = self._read_data_file(data_file[language])
-        self.gold_labels = self._read_gold_file(gold_file[language])
         self.transform = transform
         self.max_samples =  max_samples
         self.language = language
 
-        # Initialize translation model and tokenizer if needed
-        #if self.language != 'en':
-        #    model_name = f'Helsinki-NLP/opus-mt-{self.language}-en'
-        #    self.tokenizer = MarianTokenizer.from_pretrained(model_name)
-        #    self.translation_model = MarianMTModel.from_pretrained(model_name)
+         # Read data and gold labels for all languages
+        self.data_info = self._read_data_file(data_file[language])
+        self.gold_labels = self._read_gold_file(gold_file[language])
 
         # Build data
-        self.data = self.build_dataset()
+        # self.data = self.build_dataset()
 
     def build_dataset(self):
         # Initialize the data list
@@ -49,12 +43,6 @@ class VisualWSDDatasetCLIP(Dataset):
 
         # Return data
         return data
-    
-    def translate(self, text):
-        with torch.no_grad():
-            inputs = self.tokenizer(text, return_tensors="pt", padding=True, truncation=True)
-            translated = self.translation_model.generate(**inputs)
-            return self.tokenizer.decode(translated[0], skip_special_tokens=True)
 
     def _read_data_file(self, file_path):
         data_info = []
@@ -73,22 +61,20 @@ class VisualWSDDatasetCLIP(Dataset):
         return gold_labels
 
     def __len__(self):
-        return len(self.data)
+        return len(self.data_info)
 
     def __getitem__(self, idx):
         if torch.is_tensor(idx):
             idx = idx.tolist()
-        
-        label = self.data[idx][0]
-        images = self.data[idx][1]
-        gold_label_index = self.data[idx][2]
-        
-        if self.transform:
-            images = [self.transform(Image.open(img_path)) for img_path in images]
 
-        # Translate the phrase if necessary
-        #if self.language != 'en':
-        #    label = self.translate(label)
+        # Extract label, images, and gold label index
+        label = self.data_info[idx][1] #]
+        images = [Image.open(os.path.join(self.data_dir, img_name)) for img_name in self.data_info[idx][2:]]
+        gold_label_index = torch.tensor(self.data_info[idx][2:].index(self.gold_labels[idx]))
+        
+        # Apply transform if specified
+        if self.transform:
+            images = [self.transform(img) for img in images]
 
         return label, images, gold_label_index
     
@@ -126,3 +112,4 @@ class TripletsWSDDatasetCLIP(Dataset):
             neg_image = self.transform(Image.open(neg_image))
 
         return self.triplets[idx][0], pos_image, neg_image
+    

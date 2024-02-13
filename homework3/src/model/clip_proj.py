@@ -3,10 +3,9 @@ import torch
 from torch import nn
 from transformers import CLIPModel, CLIPTokenizer
 from torch.nn.functional import cosine_similarity
-from lavis.models import load_model_and_preprocess
 
 
-class ClipModel(pl.LightningModule):
+class ClipModelProj(pl.LightningModule):
     def __init__(self):
         super().__init__()
         # Initialize CLIP model
@@ -16,6 +15,10 @@ class ClipModel(pl.LightningModule):
         # Freeze CLIP model's parameters
         for param in self.clip_model.parameters():
             param.requires_grad = False
+
+        # Define projection layers
+        self.vision_proj = nn.Linear(512, 128)
+        self.text_proj = nn.Linear(512, 128)
 
     def forward(self, text, images):
         # Tokenize text inputs and send them to the device
@@ -30,6 +33,8 @@ class ClipModel(pl.LightningModule):
         images = images.view(-1, *images.size()[2:])
         # Get image features from CLIP
         image_features = self.clip_model.get_image_features(images)
+        # Project image features to the same dimension as text features
+        image_features = self.vision_proj(image_features)
 
         # Reshape image_features back to [batch_size, 10, feature_size]
         batch_size = text_inputs['input_ids'].size(0)
@@ -37,6 +42,8 @@ class ClipModel(pl.LightningModule):
 
         # Compute text features from CLIP
         text_features = self.clip_model.get_text_features(**text_inputs).unsqueeze(1)
+        # Project text features to the same dimension as image features
+        text_features = self.text_proj(text_features)
 
         return text_features, image_features
     
@@ -115,7 +122,10 @@ class ClipModel(pl.LightningModule):
     def configure_optimizers(self):
         # Only optimize the parameters of your projection layers
         optimizer = torch.optim.Adam(
-            filter(lambda p: p.requires_grad, self.parameters()),
+            [
+                {"params": self.vision_proj.parameters()},
+                {"params": self.text_proj.parameters()},
+            ],
             lr=1e-5,
         )
         return optimizer

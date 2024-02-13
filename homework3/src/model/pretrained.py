@@ -3,116 +3,113 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 import pytorch_lightning as pl
-from transformers import DistilBertModel
+from transformers import DistilBertModel, DistilBertTokenizer
 from torchvision.models import resnet18
+from torch.nn.functional import cosine_similarity
 
 
 class VisualWSDModel(pl.LightningModule):
-    def __init__(self, learning_rate=1e-4, embedding_dim=768):
+    def __init__(self, learning_rate=1e-4, projection_dim=128):
         super(VisualWSDModel, self).__init__()
+        self.projection_dim = projection_dim
         # Text Embedding
         self.text_embedder = DistilBertModel.from_pretrained('distilbert-base-uncased')
+        self.text_tokenizer = DistilBertTokenizer.from_pretrained('distilbert-base-uncased')
         # Image Embedding
         self.image_embedder = resnet18(pretrained=True)
         self.image_embedder.fc = nn.Identity()  # Remove the classification head
 
-        # FC layers to bring text and image embeddings to the same dimension
-        self.text_fc = nn.Sequential(
-            nn.Linear(768, 512),  # First linear layer (BERT embedding size to common dimension)
-            nn.ReLU(),            # Activation function
-            nn.Dropout(0.5),      # Dropout for regularization
-            nn.Linear(512, embedding_dim)  # Final linear layer to desired embedding_dim
-        )
-        self.image_fc = nn.Sequential(
-            nn.Linear(512, 256),  # First linear layer (ResNet embedding size to common dimension)
-            nn.ReLU(),            # Activation function
-            nn.Dropout(0.5),      # Dropout for regularization
-            nn.Linear(256, embedding_dim)  # Final linear layer to desired embedding_dim
-        )
+        # Projection layers
+        self.text_proj = nn.Linear(768, projection_dim)  # Project text embeddings
+        self.image_proj = nn.Linear(512, projection_dim)  # Project image embeddings
 
         # Other parameters
         self.learning_rate = learning_rate
-        self.criterion = nn.TripletMarginLoss(margin=1.0)
 
-        # Freeze text embedder parameters
+        # Freeze parameters of embedders
         for param in self.text_embedder.parameters():
             param.requires_grad = False
-
-        # Freeze image embedder parameters
         for param in self.image_embedder.parameters():
             param.requires_grad = False
 
-
-    def forward(self, input_ids, attention_mask, image):
+    def forward(self, text, images):
         # Process Texts
-        outputs = self.text_embedder(input_ids=input_ids, attention_mask=attention_mask)
-        text_embeddings = outputs.last_hidden_state
-        # Extract the embedding of the first token ([CLS] token)
-        cls_embeddings = text_embeddings[:, 0]
-
-        # Apply the fully connected layer
-        text_embeddings = self.text_fc(cls_embeddings)
+        inputs = self.text_tokenizer(text, return_tensors="pt", padding=True, truncation=True, max_length=512)
+        input_ids, attention_mask = inputs.input_ids.to(self.device), inputs.attention_mask.to(self.device)
+        text_outputs = self.text_embedder(input_ids=input_ids, attention_mask=attention_mask)
+        text_embeddings = text_outputs.last_hidden_state[:, 0, :]  # Use the [CLS] token
+        text_embeddings = self.text_proj(text_embeddings)  # Project text embeddings
 
         # Process Images
-        image_embeddings = self.image_embedder(image)
-        image_embeddings = self.image_fc(image_embeddings)
+        images = torch.stack(images).view(-1, *images[0].size()[1:])  # Flatten list of image batches for processing
+        image_embeddings = self.image_embedder(images)
+        image_embeddings = self.image_proj(image_embeddings)  # Project image embeddings
+        image_embeddings = image_embeddings.view(-1, 10, self.projection_dim)  # Reshape back to (batch_size, num_images, projection_dim)
 
         return text_embeddings, image_embeddings
 
+    def compute_margin_ranking_loss(self, scores, gold_label_index):
+        # Similar logic to ClipModelProj for computing the margin ranking loss
+        positive_scores = scores.gather(1, gold_label_index.unsqueeze(1)).squeeze(1)
+        mask = torch.ones_like(scores, dtype=torch.bool)
+        mask.scatter_(1, gold_label_index.unsqueeze(1), False)
+        negative_scores = scores[mask].view(scores.size(0), -1)
+        positive_scores = positive_scores.unsqueeze(1).expand_as(negative_scores)
+        target = torch.ones_like(positive_scores)
+        loss_fn = nn.MarginRankingLoss(margin=0.1)
+        loss = loss_fn(positive_scores, negative_scores, target)
+        return loss.mean()
+
     def training_step(self, batch, batch_idx):
-        # Extract data from batch
-        input_ids, attention_mask, pos_images, neg_images = batch
-
-        # Forward pass
-        pos_text_embeddings, pos_image_embeddings = self(input_ids, attention_mask, pos_images)
-        neg_text_embeddings, neg_image_embeddings = self(input_ids, attention_mask, neg_images)
-
-        # Compute triplet loss and log it
-        loss = self.criterion(pos_text_embeddings, pos_image_embeddings, neg_image_embeddings)
-
-        # Compute cosine similarities
-        pos_similarity = F.cosine_similarity(pos_text_embeddings, pos_image_embeddings)
-        neg_similarity = F.cosine_similarity(pos_text_embeddings, neg_image_embeddings)
-
-        # Compute accuracy
-        correct_predictions = (pos_similarity > neg_similarity).sum()
-        accuracy = correct_predictions.float() / pos_images.size(0)
-
-        # Log loss and accuracy
-        self.log('train_loss', loss, on_epoch=True, prog_bar=True)
-        self.log('train_accuracy', accuracy, on_epoch=True, prog_bar=True)
-
-        return loss
+        labels, images, gold_label_index = batch
+        text_embeddings, image_embeddings = self.forward(labels, images)
+        scores = cosine_similarity(text_embeddings.unsqueeze(1), image_embeddings, dim=2)
+        loss = self.compute_margin_ranking_loss(scores, gold_label_index)
+        
+        # Accuracy is the number of correct predictions divided by the number of predictions
+        accuracy = (scores.argmax(dim=1) == gold_label_index).float().mean()
+        self.log('train_loss', loss, on_step=True, on_epoch=True, prog_bar=True)
+        self.log('train_accuracy', accuracy, on_step=True, on_epoch=True)
+        
+        return {'loss': loss, 'accuracy': accuracy}
 
     def validation_step(self, batch, batch_idx):
-        # Extract data from batch
-        input_ids, attention_mask, pos_images, neg_images = batch
+        labels, images, gold_label_index = batch
+        text_embeddings, image_embeddings = self.forward(labels, images)
+        scores = cosine_similarity(text_embeddings.unsqueeze(1), image_embeddings, dim=2)
+        loss = self.compute_margin_ranking_loss(scores, gold_label_index)
+        
+        # Accuracy for validation
+        accuracy = (scores.argmax(dim=1) == gold_label_index).float().mean()
+        self.log('val_loss', loss, on_step=False, on_epoch=True, prog_bar=True)
+        self.log('val_accuracy', accuracy, on_step=False, on_epoch=True)
+        
+        return {'loss': loss, 'accuracy': accuracy}
 
-        # Forward pass
-        pos_text_embeddings, pos_image_embeddings = self(input_ids, attention_mask, pos_images)
-        neg_text_embeddings, neg_image_embeddings = self(input_ids, attention_mask, neg_images)
+    def test_step(self, batch, batch_idx):
+        labels, images, gold_label_index = batch
+        text_embeddings, image_embeddings = self.forward(labels, images)
+        scores = cosine_similarity(text_embeddings.unsqueeze(1), image_embeddings, dim=2)
 
-        # Compute triplet loss and log it
-        loss = self.criterion(pos_text_embeddings, pos_image_embeddings, neg_image_embeddings)
+        # Calculate H@1
+        top_pred = scores.argmax(dim=1)
+        h_at_1 = (top_pred == gold_label_index).float().mean()
 
-        # Compute cosine similarities
-        pos_similarity = F.cosine_similarity(pos_text_embeddings, pos_image_embeddings)
-        neg_similarity = F.cosine_similarity(pos_text_embeddings, neg_image_embeddings)
+        # Calculate MRR
+        rank = (scores.argsort(descending=True).argsort(dim=1) == gold_label_index.unsqueeze(1)).nonzero(as_tuple=True)[1] + 1
+        mrr = (1. / rank.float()).mean()
 
-        # Compute accuracy
-        correct_predictions = (pos_similarity > neg_similarity).sum()
-        accuracy = correct_predictions.float() / pos_images.size(0)
+        # Log metrics for testing
+        self.log('test_h_at_1', h_at_1, on_epoch=True, prog_bar=True)
+        self.log('test_mrr', mrr, on_epoch=True, prog_bar=True)
 
-        # Log loss and accuracy
-        self.log('val_loss', loss, on_epoch=True, prog_bar=True)
-        self.log('val_accuracy', accuracy, on_epoch=True, prog_bar=True)
-
-        return loss
+        return {'h_at_1': h_at_1, 'mrr': mrr}
 
     def configure_optimizers(self):
-        # Only optimize the fully connected layer parameters
         optimizer = torch.optim.Adam([
-                {'params': self.text_fc.parameters()},
-                {'params': self.image_fc.parameters()}
-            ], lr=self.learning_rate)
+            {'params': self.text_proj.parameters()},
+            {'params': self.image_proj.parameters()}
+        ], lr=self.learning_rate)
         return optimizer
+    
+
