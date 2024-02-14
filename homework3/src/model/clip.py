@@ -39,59 +39,7 @@ class ClipModel(pl.LightningModule):
         text_features = self.clip_model.get_text_features(**text_inputs).unsqueeze(1)
 
         return text_features, image_features
-    
-    def compute_margin_ranking_loss(self, scores, gold_label_index):
-        # Get the score of the gold label (positive score)
-        positive_scores = scores.gather(1, gold_label_index.unsqueeze(1)).squeeze(1)  # Shape: [batch_size]
 
-        # Create a mask to filter out positive scores from negative scores
-        mask = torch.ones_like(scores, dtype=torch.bool)
-        mask.scatter_(1, gold_label_index.unsqueeze(1), False)
-        negative_scores = scores[mask].view(scores.size(0), -1)  # Shape: [batch_size, num_negatives]
-
-        # Replicate positive_scores to match negative_scores shape
-        positive_scores = positive_scores.unsqueeze(1).expand_as(negative_scores)  # Shape: [batch_size, num_negatives]
-
-        # The target tensor indicating that positive score should be higher than negative scores
-        target = torch.ones_like(positive_scores)  # Shape: [batch_size, num_negatives]
-
-        # Use MarginRankingLoss across all negative samples
-        loss_fn = nn.MarginRankingLoss(margin=0.1)
-        loss = loss_fn(positive_scores, negative_scores, target)
-
-        return loss.mean()
-
-    def training_step(self, batch, batch_idx):
-        text, images, gold_label_index = batch
-        # Pass inputs to the model
-        text_features, image_features = self.forward(text, images)   
-        # Calculate cosine similarity scores between text and all images
-        scores = cosine_similarity(text_features, image_features, dim=2)
-        # Compute the loss
-        loss = self.compute_margin_ranking_loss(scores, gold_label_index)
-        self.log('train_loss', loss, on_step=True, on_epoch=True)
-        
-        # Accuracy is the number of correct predictions divided by the number of predictions
-        accuracy = (scores.argmax(dim=1) == gold_label_index).float().mean() 
-        self.log('train_accuracy', accuracy, on_step=True, on_epoch=True)
-
-        return {'loss': loss, 'accuracy': accuracy}
-        
-    def validation_step(self, batch, batch_idx):
-        text, images, gold_label_index = batch
-        # Pass inputs to the model
-        text_features, image_features = self.forward(text, images)
-        # Calculate cosine similarity scores between text and all images
-        scores = cosine_similarity(text_features, image_features, dim=2)
-        # Compute the loss
-        loss = self.compute_margin_ranking_loss(scores, gold_label_index)
-        self.log('val_loss', loss, on_step=True, on_epoch=True)
-        
-        # Accuracy is the number of correct predictions divided by the number of predictions
-        accuracy = (scores.argmax(dim=1) == gold_label_index).float().mean() 
-        self.log('val_accuracy', accuracy, on_step=True, on_epoch=True)
-
-        return {'loss': loss, 'accuracy': accuracy}
     
     def test_step(self, batch, batch_idx):
         text, images, gold_label_index = batch
@@ -111,13 +59,5 @@ class ClipModel(pl.LightningModule):
         self.log('test_mrr', mrr, on_epoch=True)
 
         return {'h_at_1': h_at_1, 'mrr': mrr}
-
-    def configure_optimizers(self):
-        # Only optimize the parameters of your projection layers
-        optimizer = torch.optim.Adam(
-            filter(lambda p: p.requires_grad, self.parameters()),
-            lr=1e-5,
-        )
-        return optimizer
 
 
